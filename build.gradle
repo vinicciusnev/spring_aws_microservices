@@ -1,0 +1,57 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.5'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.palantir.docker' version '0.35.0'
+}
+
+group = 'vinicciusdev'
+version = '1.1.0'
+description = 'Projeto de microsserviços com Spring Boot em cluster AWS usando ECS, SNS, SQS, RDS, DynamoDB e S3.'
+
+bootJar {
+    archiveBaseName.set('spring-aws-microservice01')
+    archiveVersion.set('1.1.0')
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://repo.spring.io/milestone' }
+    maven { url 'https://repo.spring.io/snapshot' }
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework:spring-jms:5.2.9.RELEASE'
+    // implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    // implementation 'org.mariadb.jdbc:mariadb-java-client:3.2.0'
+    // implementation 'com.amazonaws:aws-java-sdk-sns:1.12.13'
+    // implementation 'com.amazonaws:aws-java-sdk-s3:1.12.13'
+
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.register('unpack', Copy) {
+    dependsOn bootJar
+    from(zipTree(tasks.bootJar.outputs.files.singleFile))
+    into("build/dependency")
+}
+
+docker {
+    name "${project.group}/${project.name}"
+    buildx true
+    platform 'linux/amd64'
+    copySpec.from(tasks.unpack.outputs).into('dependency')
+    buildArgs(['DEPENDENCY' : "dependency"])
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
