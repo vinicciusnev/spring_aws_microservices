@@ -6,12 +6,12 @@ plugins {
 }
 
 group = 'vinicciusdev'
-version = '1.0.0'
+version = '1.1.0'
 description = 'Projeto de microsserviços com Spring Boot em cluster AWS usando ECS, SNS, SQS, RDS, DynamoDB e S3.'
 
 bootJar {
     archiveBaseName.set('spring-aws-microservice01')
-    archiveVersion.set('1.0.0')
+    archiveVersion.set('1.1.0')
 }
 
 java {
