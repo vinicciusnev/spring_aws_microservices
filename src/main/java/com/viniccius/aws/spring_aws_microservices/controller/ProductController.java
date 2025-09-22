@@ -16,7 +16,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProductController {
 
-    @Autowired
     private final ProductService productService;
 
     @GetMapping
@@ -26,35 +25,26 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponseDTO> findById(@PathVariable Long id) {
-        return productService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(productService.findById(id));
     }
 
     @GetMapping("/bycode")
     public ResponseEntity<ProductResponseDTO> findByCode(@RequestParam String code) {
-        return productService.findByCode(code)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(productService.findByCode(code));
     }
 
     @PostMapping
     public ResponseEntity<ProductResponseDTO> save(@RequestBody ProductRequestDTO dto) {
-        ProductResponseDTO saved = productService.save(dto);
-        return new ResponseEntity<>(saved, HttpStatus.CREATED);
+        return new ResponseEntity<>(productService.save(dto), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ProductResponseDTO> update(@PathVariable Long id, @RequestBody ProductRequestDTO dto) {
-        return productService.update(id, dto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(productService.update(id, dto));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ProductResponseDTO> delete(@PathVariable Long id) {
-        return productService.delete(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(productService.delete(id));
     }
 }
