@@ -5,5 +5,6 @@ public record ProductRequestDTO(
         String name,
         String model,
         String code,
-        float price
+        float price,
+        String color
 ) {}

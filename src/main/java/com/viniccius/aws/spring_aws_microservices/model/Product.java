@@ -32,4 +32,7 @@ public class Product {
     private String code;
 
     private float price;
+
+    @Column(length = 12)
+    private String color;
 }

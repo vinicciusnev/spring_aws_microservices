@@ -70,6 +70,7 @@ public class ProductService {
                 .code(dto.code())
                 .price(dto.price())
                 .model(dto.model())
+                .color(dto.color())
                 .build();
     }
 
@@ -79,7 +80,8 @@ public class ProductService {
                 product.getName(),
                 product.getModel(),
                 product.getCode(),
-                product.getPrice()
+                product.getPrice(),
+                product.getColor()
         );
     }
 }
