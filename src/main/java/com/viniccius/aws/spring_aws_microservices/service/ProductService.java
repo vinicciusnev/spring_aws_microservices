@@ -2,34 +2,42 @@ package com.viniccius.aws.spring_aws_microservices.service;
 
 import com.viniccius.aws.spring_aws_microservices.dto.request.ProductRequestDTO;
 import com.viniccius.aws.spring_aws_microservices.dto.response.ProductResponseDTO;
+import com.viniccius.aws.spring_aws_microservices.exception.ProductNotFoundException;
 import com.viniccius.aws.spring_aws_microservices.model.Product;
 import com.viniccius.aws.spring_aws_microservices.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+
 
 @Service
 public class ProductService {
 
+    private final ProductRepository productRepository;
+
     @Autowired
-    private ProductRepository productRepository;
+    public ProductService(ProductRepository productRepository) {
+        this.productRepository = productRepository;
+    }
 
     public List<ProductResponseDTO> findAll() {
         return productRepository.findAll()
                 .stream()
                 .map(this::toResponseDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
-    public Optional<ProductResponseDTO> findById(Long id) {
-        return productRepository.findById(id).map(this::toResponseDTO);
+    public ProductResponseDTO findById(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException("Produto com id " + id + " não encontrado."));
+        return toResponseDTO(product);
     }
 
-    public Optional<ProductResponseDTO> findByCode(String code) {
-        return productRepository.findByCode(code).map(this::toResponseDTO);
+    public ProductResponseDTO findByCode(String code) {
+        Product product = productRepository.findByCode(code)
+                .orElseThrow(() -> new ProductNotFoundException("Produto com código " + code + " não encontrado."));
+        return toResponseDTO(product);
     }
 
     public ProductResponseDTO save(ProductRequestDTO dto) {
@@ -38,22 +46,22 @@ public class ProductService {
         return toResponseDTO(saved);
     }
 
-    public Optional<ProductResponseDTO> update(Long id, ProductRequestDTO dto) {
-        if (productRepository.existsById(id)) {
-            Product product = toEntity(dto);
-            product.setId(id);
-            Product updated = productRepository.save(product);
-            return Optional.of(toResponseDTO(updated));
+    public ProductResponseDTO update(Long id, ProductRequestDTO dto) {
+        if (!productRepository.existsById(id)) {
+            throw new ProductNotFoundException("Produto com id " + id + " não encontrado.");
         }
 
-        return Optional.empty();
+        Product product = toEntity(dto);
+        product.setId(id);
+        Product updated = productRepository.save(product);
+        return toResponseDTO(updated);
     }
 
-    public Optional<ProductResponseDTO> delete(Long id) {
-        return productRepository.findById(id).map(product -> {
-            productRepository.delete(product);
-            return toResponseDTO(product);
-        });
+    public ProductResponseDTO delete(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException("Produto com id " + id + " não encontrado."));
+        productRepository.delete(product);
+        return toResponseDTO(product);
     }
 
     private Product toEntity(ProductRequestDTO dto) {
