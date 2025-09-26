@@ -2,6 +2,7 @@ package com.viniccius.aws.spring_aws_microservices.service;
 
 import com.viniccius.aws.spring_aws_microservices.dto.request.ProductRequestDTO;
 import com.viniccius.aws.spring_aws_microservices.dto.response.ProductResponseDTO;
+import com.viniccius.aws.spring_aws_microservices.enums.EventType;
 import com.viniccius.aws.spring_aws_microservices.exception.ProductNotFoundException;
 import com.viniccius.aws.spring_aws_microservices.model.Product;
 import com.viniccius.aws.spring_aws_microservices.repository.ProductRepository;
@@ -16,9 +17,12 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
+    private final ProductPublisher productPublisher;
+
     @Autowired
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(ProductRepository productRepository, ProductPublisher productPublisher) {
         this.productRepository = productRepository;
+        this.productPublisher = productPublisher;
     }
 
     public List<ProductResponseDTO> findAll() {
@@ -43,6 +47,9 @@ public class ProductService {
     public ProductResponseDTO save(ProductRequestDTO dto) {
         Product product = toEntity(dto);
         Product saved = productRepository.save(product);
+
+        productPublisher.publishProductEvent(product, EventType.PRODUCT_CREATED, "vinicciusnev");
+
         return toResponseDTO(saved);
     }
 
@@ -54,13 +61,20 @@ public class ProductService {
         Product product = toEntity(dto);
         product.setId(id);
         Product updated = productRepository.save(product);
+
+        productPublisher.publishProductEvent(updated, EventType.PRODUCT_UPDATED, "vinicciusnev");
+
         return toResponseDTO(updated);
     }
 
     public ProductResponseDTO delete(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Produto com id " + id + " não encontrado."));
+
         productRepository.delete(product);
+
+        productPublisher.publishProductEvent(product, EventType.PRODUCT_DELETED, "vinicciusnev");
+
         return toResponseDTO(product);
     }
 
