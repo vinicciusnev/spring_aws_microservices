@@ -5,4 +5,5 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
-rootProject.name = 'spring-aws-microservice01'
+rootProject.name = "spring-aws-microservices"
+include("product-service", "inventory-service")
