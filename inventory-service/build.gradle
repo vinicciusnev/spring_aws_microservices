@@ -1,0 +1,59 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.5.6'
+	id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.palantir.docker' version '0.35.0'
+}
+
+group = 'vinicciusdev'
+version = '1.0.0'
+description = 'Inventory Service - Consome eventos da SQS e persiste no DynamoDB.'
+
+bootJar {
+    archiveBaseName.set('inventory-service')
+    archiveVersion.set('1.0.0')
+}
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+repositories {
+	mavenCentral()
+    maven { url 'https://repo.spring.io/milestone' }
+    maven { url 'https://repo.spring.io/snapshot' }
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    compileOnly 'org.projectlombok:lombok:1.18.34'
+    annotationProcessor 'org.projectlombok:lombok:1.18.34'
+    testCompileOnly 'org.projectlombok:lombok:1.18.34'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.34'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.register('unpack', Copy) {
+    dependsOn bootJar
+    from(zipTree(tasks.bootJar.outputs.files.singleFile))
+    into("build/dependency")
+}
+
+docker {
+    name "${project.group}/${project.name}"
+    buildx true
+    platform 'linux/amd64'
+    copySpec.from(tasks.unpack.outputs).into('dependency')
+    buildArgs(['DEPENDENCY' : "dependency"])
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

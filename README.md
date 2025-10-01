@@ -29,8 +29,8 @@ O objetivo do projeto é aplicar conceitos de **microsserviços com Spring Boot*
 ---
 
 ## 📂 Estrutura inicial do projeto
-- `spring-aws-microservices/` → código-fonte do projeto
-- `infrastructure/` → scripts e configurações da infraestrutura AWS (CDK)
+- `spring-aws-microservices/product-service` → Microservico com crud de produtos, e responsável por publicar eventos
+- `spring-aws-microservices/inventory-service` → Microservico responsável por consumir os eventos de uma fila SQS, e persistir no DynamoDB
 
 ---
 
